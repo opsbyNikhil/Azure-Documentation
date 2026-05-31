@@ -20,6 +20,7 @@
   - [🧩 Azure VM Naming Convention](#-azure-vm-naming-convention)
     - [Example: `DCads_v5`](#example-dcads_v5)
     - [Example: `DC8ads_v5`](#example-dc8ads_v5)
+- [Azure Info](#azure-info)
 
 ---
 
@@ -172,3 +173,7 @@
 - **v5** → Version  
 
 ---
+
+# Azure Info
+
+#[OveralAzure](./Images/Azure-1.png)
