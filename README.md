@@ -21,6 +21,23 @@
     - [Example: `DCads_v5`](#example-dcads_v5)
     - [Example: `DC8ads_v5`](#example-dc8ads_v5)
 - [Azure Info](#azure-info)
+- [How to create VM in Azure](#how-to-create-vm-in-azure)
+  - [🚀 1. Images](#-1-images)
+    - [a. Marketplace Image](#a-marketplace-image)
+    - [b. Custom Images](#b-custom-images)
+    - [c. Shared Images (Community Images)](#c-shared-images-community-images)
+    - [d. Managed Images](#d-managed-images)
+  - [💾 2. Disk Types](#-2-disk-types)
+    - [a. OS Disk](#a-os-disk)
+    - [b. Data Disk](#b-data-disk)
+    - [c. Temporary Disk / Local Storage](#c-temporary-disk--local-storage)
+  - [🌐 3. Networking](#-3-networking)
+    - [VM Networking Flow:](#vm-networking-flow)
+  - [🔐 4. Authentication](#-4-authentication)
+    - [Options:](#options)
+    - [Best Practice:](#best-practice)
+  - [⚙️ 5. VM Sizes](#️-5-vm-sizes)
+  - [🏗️ 6. VM Architecture Overview](#️-6-vm-architecture-overview)
 
 ---
 
@@ -177,3 +194,125 @@
 # Azure Info
 
 ![OveralAzure](./Images/Azure-1.png)
+
+---
+
+# How to create VM in Azure
+
+## 🚀 1. Images
+
+Azure VM creation starts with selecting an image:
+
+### a. Marketplace Image
+- Pre-built images provided by Azure
+- Examples:
+  - Ubuntu
+  - Red Hat
+  - Windows Server
+
+---
+
+### b. Custom Images
+- Your own VM image created from an existing machine
+- Used for:
+  - Project-specific environments
+  - Pre-configured applications
+  - Reusable VM templates
+
+---
+
+### c. Shared Images (Community Images)
+- Images shared across regions or organizations
+- Example:
+  - Image created in `central india` can be used in `ap-south-2`
+- Useful for:
+  - Cross-region deployments
+  - Standardized environments
+
+---
+
+### d. Managed Images
+- Lightweight reusable VM images
+- Used for quick deployments
+- Example:
+  - Nginx server image
+- Best for:
+  - Small, repeated deployments
+  - Fast provisioning
+
+---
+
+## 💾 2. Disk Types
+
+### a. OS Disk
+- Stores operating system files
+- Fully persistent storage
+- Type: **Non-ephemeral**
+- Data is NOT lost if VM stops or restarts
+
+---
+
+### b. Data Disk
+- Used for application data
+- Attached separately from OS disk
+- Can be expanded independently
+
+---
+
+### c. Temporary Disk / Local Storage
+- Used for cache and temporary files
+- Type: **Ephemeral storage**
+- Data is LOST when VM is deleted or restarted
+- Best for:
+  - Temporary processing
+  - Cache files
+
+---
+
+## 🌐 3. Networking
+
+VM networking components:
+
+- **Virtual Network (VNet / VPC equivalent)**
+- **Network Interface (NIC)**
+- **Public IP Address**
+- **Network Security Group (NSG)**
+
+### VM Networking Flow:
+
+
+- > VM → Network Interface → VNet → Public IP → NSG Rules
+
+
+---
+
+## 🔐 4. Authentication
+
+### Options:
+
+- Username & Password
+- SSH Key-Based Authentication (Recommended)
+
+### Best Practice:
+- Use SSH keys for Linux VMs
+- More secure than password-based login
+
+---
+
+## ⚙️ 5. VM Sizes
+
+- Defines CPU, Memory, and performance capacity
+- Choose based on workload:
+  - Web apps → General Purpose
+  - Heavy compute → Compute Optimized
+  - Large memory apps → Memory Optimized
+  - Big data → Storage Optimized
+  - AI/ML → GPU Optimized
+
+---
+
+## 🏗️ 6. VM Architecture Overview
+
+![VM Architecture Overview](./Images/Azure-2.png)
+
+---
