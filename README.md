@@ -161,6 +161,28 @@
     - [Step 4: Use Run Command](#step-4-use-run-command)
 - [Important VM Operations](#important-vm-operations)
 - [Architecture Flow](#architecture-flow-2)
+- [Azure VM Images](#azure-vm-images)
+  - [Overview](#overview)
+  - [Azure Image Creation Process](#azure-image-creation-process)
+    - [Step 1: Open the VM](#step-1-open-the-vm)
+    - [Step 2: Configure Azure Compute Gallery](#step-2-configure-azure-compute-gallery)
+    - [Step 3: Select Operating System State](#step-3-select-operating-system-state)
+      - [Generalized Image](#generalized-image)
+      - [Specialized Image](#specialized-image)
+    - [Step 4: Create VM Image Definition](#step-4-create-vm-image-definition)
+  - [Important Note](#important-note)
+- [Types of Azure Images](#types-of-azure-images)
+  - [1. Marketplace Images](#1-marketplace-images)
+  - [2. Custom Images](#2-custom-images)
+  - [3. Shared Image Gallery (SIG)](#3-shared-image-gallery-sig)
+- [Practical Example](#practical-example)
+    - [Step 1](#step-1)
+    - [Step 2](#step-2)
+    - [Step 3](#step-3)
+    - [Step 4](#step-4)
+    - [Step 5](#step-5)
+- [Benefits of Azure Images](#benefits-of-azure-images)
+- [Architecture Flow](#architecture-flow-3)
 
 ---
 
@@ -1664,5 +1686,198 @@ Nginx Web Page
         V
 Monitoring & Activity Logs
 ```
+
+---
+
+# Azure VM Images
+
+## Overview
+
+If one Virtual Machine (VM) is running with an application installed, along with all required configurations and the operating system, and you want to create another VM with the same setup, you can use **Azure Images**.
+
+Azure Images allow you to create a backup or copy of an existing VM and use it to launch new VMs with the same configuration.
+
+---
+
+## Azure Image Creation Process
+
+### Step 1: Open the VM
+
+1. Go to **Azure Portal**.
+2. Navigate to **Virtual Machines**.
+3. Select the required VM.
+4. Open the **Overview** page.
+5. Click on **Capture**.
+
+---
+
+### Step 2: Configure Azure Compute Gallery
+
+Azure Compute Gallery is a collection of images used to manage and share VM images.
+
+1. Select or create a **Resource Group**.
+2. Create a **Target Azure Compute Gallery**.
+3. Configure image settings.
+
+---
+
+### Step 3: Select Operating System State
+
+Azure provides two image types:
+
+#### Generalized Image
+
+- VM created from this image requires:
+  - Hostname
+  - Administrator Username
+  - Password
+  - Other VM configuration details during first boot
+- Azure handles the OS preparation.
+- By default, Azure selects **Generalized**.
+
+#### Specialized Image
+
+- VM created from this image is already configured.
+- No need to provide:
+  - Hostname
+  - Admin Username
+  - Password
+- All settings are retained from the source VM.
+- Management of configuration is the user's responsibility.
+
+---
+
+### Step 4: Create VM Image Definition
+
+Provide the following details:
+
+- Operating System (Windows/Linux)
+- Publisher
+- Offer
+- SKU (Stock Keeping Unit)
+- Version Number
+- Replication Settings (Availability Zones/Regions)
+
+Click **Create** to generate the image.
+
+---
+
+## Important Note
+
+When an image is created:
+
+- The source VM is automatically stopped.
+- Azure captures OS-level and disk-level configurations.
+- This ensures consistency of the image.
+- Any changes made after image creation will not be included in the captured image.
+
+---
+
+# Types of Azure Images
+
+## 1. Marketplace Images
+
+Pre-built images provided by Microsoft or third-party vendors.
+
+Examples:
+
+- Ubuntu
+- Red Hat
+- Windows Server
+- CentOS
+
+---
+
+## 2. Custom Images
+
+Images created from your own virtual machines.
+
+Use case:
+
+- Organization-specific configurations
+- Pre-installed applications
+- Customized operating systems
+
+---
+
+## 3. Shared Image Gallery (SIG)
+
+A centralized repository for managing and sharing custom images.
+
+Features:
+
+- Multi-region replication
+- Image versioning
+- High availability
+- Easy image sharing across subscriptions and regions
+
+---
+
+# Practical Example
+
+### Step 1
+
+Create a Virtual Machine.
+
+### Step 2
+
+Login to the VM.
+
+### Step 3
+
+Install and configure a web application.
+
+Example:
+
+- Nginx
+- Apache
+- Tomcat
+- Jenkins
+
+### Step 4
+
+Capture the VM and create an Azure Image.
+
+### Step 5
+
+Create a new VM using the captured image.
+
+Result:
+
+- Same Operating System
+- Same Application
+- Same Configurations
+- Faster VM deployment
+
+---
+
+# Benefits of Azure Images
+
+- Faster VM provisioning
+- Consistent environments
+- Easy backup and recovery
+- Reduced manual configuration
+- Multi-region deployment support
+- Simplified application deployment
+
+---
+
+# Architecture Flow
+
+VM Created
+    ↓
+Application Installed
+    ↓
+Configuration Completed
+    ↓
+Capture VM
+    ↓
+Create Azure Image
+    ↓
+Store in Azure Compute Gallery
+    ↓
+Create New VM from Image
+    ↓
+Same OS + Same Application + Same Configuration
 
 ---
