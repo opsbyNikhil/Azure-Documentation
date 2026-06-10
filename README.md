@@ -183,6 +183,57 @@
     - [Step 5](#step-5)
 - [Benefits of Azure Images](#benefits-of-azure-images)
 - [Architecture Flow](#architecture-flow-3)
+- [Creating and Updating an Azure VM Image](#creating-and-updating-an-azure-vm-image)
+  - [Step 1: Create a Virtual Machine](#step-1-create-a-virtual-machine-2)
+  - [Step 2: Connect to the VM](#step-2-connect-to-the-vm)
+  - [Step 3: Install Nginx](#step-3-install-nginx)
+  - [Step 4: Deploy a Sample Web Application](#step-4-deploy-a-sample-web-application)
+- [Creating an Image from the VM](#creating-an-image-from-the-vm)
+  - [Step 5: Capture the VM Image](#step-5-capture-the-vm-image)
+  - [Step 6: Configure Azure Compute Gallery](#step-6-configure-azure-compute-gallery)
+    - [Generalized](#generalized)
+    - [Specialized](#specialized)
+  - [Step 7: Create an Image Definition](#step-7-create-an-image-definition)
+  - [Step 8: Image Creation Process](#step-8-image-creation-process)
+- [Creating a New VM from the Custom Image](#creating-a-new-vm-from-the-custom-image)
+  - [Step 9: Deploy a VM Using the Custom Image](#step-9-deploy-a-vm-using-the-custom-image)
+- [Updating an Existing Image](#updating-an-existing-image)
+  - [Step 10: Modify the VM](#step-10-modify-the-vm)
+- [Methods to Update an Image](#methods-to-update-an-image)
+  - [Method 1: VM-Based Image Update](#method-1-vm-based-image-update)
+  - [Method 2: Azure Compute Gallery Versioning](#method-2-azure-compute-gallery-versioning)
+    - [Create a New Image Version](#create-a-new-image-version)
+- [Summary](#summary-1)
+- [Azure Bastion Host](#azure-bastion-host)
+  - [Overview](#overview-1)
+  - [Prerequisites for Azure Bastion](#prerequisites-for-azure-bastion)
+    - [1. Resource Group](#1-resource-group)
+    - [2. Virtual Network (VNet)](#2-virtual-network-vnet)
+    - [3. AzureBastionSubnet](#3-azurebastionsubnet)
+    - [4. Public IP Address](#4-public-ip-address)
+    - [5. SKU (Stock Keeping Unit)](#5-sku-stock-keeping-unit)
+  - [Architecture Flow](#architecture-flow-4)
+  - [Steps to Implement Azure Bastion Host (Method-1)](#steps-to-implement-azure-bastion-host-method-1)
+    - [Step 1: Create Azure Bastion Host](#step-1-create-azure-bastion-host)
+    - [Step 2: Configure Basic Details](#step-2-configure-basic-details)
+    - [Step 3: Validation and Deployment](#step-3-validation-and-deployment)
+    - [Common Reason for Deployment Failure](#common-reason-for-deployment-failure)
+    - [Mandatory Requirement](#mandatory-requirement)
+    - [Architecture Flow](#architecture-flow-5)
+    - [Result](#result)
+- [Azure Bastion Host (Method-2)](#azure-bastion-host-method-2)
+  - [Steps to Implement Azure Bastion Host](#steps-to-implement-azure-bastion-host)
+    - [Step 1: Create a Virtual Machine](#step-1-create-a-virtual-machine-3)
+    - [Step 2: Configure Virtual Machine](#step-2-configure-virtual-machine)
+    - [Step 3: Validation and Deployment](#step-3-validation-and-deployment-1)
+    - [Step 4: Connect Using Azure Bastion](#step-4-connect-using-azure-bastion)
+    - [Step 5: Create Azure Bastion](#step-5-create-azure-bastion)
+    - [Step 6: Validation and Deployment](#step-6-validation-and-deployment)
+    - [Step 7: Connect to the Virtual Machine](#step-7-connect-to-the-virtual-machine)
+  - [Architecture Flow](#architecture-flow-6)
+  - [Benefits of Azure Bastion](#benefits-of-azure-bastion)
+  - [Result](#result-1)
+  - [Interview Definition](#interview-definition)
 
 ---
 
@@ -1288,29 +1339,29 @@ An Azure Subscription is a logical unit that provides access to Azure services a
 
 ### 1. Free Account
 
-* Provides free Azure credits for a limited period.
-* Includes access to several Azure services with free usage limits.
-* Suitable for learning, testing, and practice purposes.
+- Provides free Azure credits for a limited period.
+- Includes access to several Azure services with free usage limits.
+- Suitable for learning, testing, and practice purposes.
 
 #### Features
 
-* Free trial credits.
-* Limited service usage.
-* No charges until free credits are exhausted.
+- Free trial credits.
+- Limited service usage.
+- No charges until free credits are exhausted.
 
 ---
 
 ### 2. Pay-As-You-Go Subscription
 
-* Users pay only for the resources they consume.
-* No upfront commitment required.
-* Suitable for production environments and enterprise workloads.
+- Users pay only for the resources they consume.
+- No upfront commitment required.
+- Suitable for production environments and enterprise workloads.
 
 #### Features
 
-* Flexible pricing model.
-* Unlimited resource creation based on requirements.
-* Monthly billing based on actual usage.
+- Flexible pricing model.
+- Unlimited resource creation based on requirements.
+- Monthly billing based on actual usage.
 
 ---
 
@@ -1648,15 +1699,15 @@ Execute troubleshooting commands remotely.
 
 # Important VM Operations
 
-| Operation | Purpose |
-|------------|----------|
-| User Data | Execute scripts during VM creation |
-| Run Command | Execute commands after deployment |
-| Resize VM | Increase CPU and Memory |
-| Reset Password | Recover VM access |
-| Monitoring | Track VM performance |
-| Activity Log | View VM operation history |
-| Networking Rules | Manage inbound/outbound traffic |
+| Operation        | Purpose                            |
+| ---------------- | ---------------------------------- |
+| User Data        | Execute scripts during VM creation |
+| Run Command      | Execute commands after deployment  |
+| Resize VM        | Increase CPU and Memory            |
+| Reset Password   | Recover VM access                  |
+| Monitoring       | Track VM performance               |
+| Activity Log     | View VM operation history          |
+| Networking Rules | Manage inbound/outbound traffic    |
 
 ---
 
@@ -1865,19 +1916,562 @@ Result:
 # Architecture Flow
 
 VM Created
-    ↓
+↓
 Application Installed
-    ↓
+↓
 Configuration Completed
-    ↓
+↓
 Capture VM
-    ↓
+↓
 Create Azure Image
-    ↓
+↓
 Store in Azure Compute Gallery
-    ↓
+↓
 Create New VM from Image
-    ↓
+↓
 Same OS + Same Application + Same Configuration
+
+---
+
+# Creating and Updating an Azure VM Image
+
+## Step 1: Create a Virtual Machine
+
+1. Go to the Azure Portal.
+2. Create a new Virtual Machine.
+3. Select or create a Resource Group.
+4. Enter the VM Name.
+5. Choose the Region and Availability Zone.
+6. Select **Ubuntu** as the Image.
+7. Choose **Password** as the Authentication Type.
+8. Provide the Username and Password.
+9. Click **Review + Create**.
+10. Wait for validation to complete and then click **Create**.
+
+---
+
+## Step 2: Connect to the VM
+
+After deployment is completed, connect to the VM using SSH:
+
+```bash
+ssh <username>@<public-ip>
+```
+
+Enter the password when prompted.
+
+---
+
+## Step 3: Install Nginx
+
+Update the package repository:
+
+```bash
+sudo apt update
+```
+
+Install Nginx:
+
+```bash
+sudo apt install nginx -y
+```
+
+---
+
+## Step 4: Deploy a Sample Web Application
+
+Download the application package:
+
+```bash
+wget <url.zip>
+```
+
+Extract the package:
+
+```bash
+sudo unzip <folder-name.zip> -d /var/www/html/
+```
+
+Verify the application by accessing:
+
+```text
+http://<public-ip>
+```
+
+---
+
+# Creating an Image from the VM
+
+## Step 5: Capture the VM Image
+
+1. Navigate to the VM Overview page.
+2. Click **Capture**.
+3. Select the Resource Group.
+
+---
+
+## Step 6: Configure Azure Compute Gallery
+
+1. Create or select an existing **Azure Compute Gallery**.
+2. Choose the Operating System State.
+
+### Generalized
+
+- VMs created from this image require:
+  - Hostname
+  - Admin Username
+  - Password
+  - Other VM-related configuration during first boot
+- Azure handles the generalization process.
+
+### Specialized
+
+- VMs created from this image are fully configured.
+- No need to provide:
+  - Hostname
+  - Admin Username
+  - Password
+- Configuration remains exactly as it exists in the source VM.
+
+---
+
+## Step 7: Create an Image Definition
+
+Create a Target VM Image Definition and provide:
+
+- Operating System
+- Publisher
+- Offer
+- SKU (Stock Keeping Unit)
+
+The Image Definition stores OS-level metadata for the image.
+
+Also provide:
+
+- Version Number
+- Replication Regions / Zones
+
+Click **Review + Create** and then **Create**.
+
+---
+
+## Step 8: Image Creation Process
+
+When the image creation process starts:
+
+- The source VM is automatically stopped.
+- Azure captures the OS disk and configuration.
+- The image is stored in the Azure Compute Gallery.
+
+> Note: The VM is stopped to ensure disk consistency during image creation.
+
+---
+
+# Creating a New VM from the Custom Image
+
+## Step 9: Deploy a VM Using the Custom Image
+
+1. Create a new Virtual Machine.
+2. Select **My Images**.
+3. Choose the custom image created earlier.
+4. Complete the VM creation process.
+
+Connect to the VM:
+
+```bash
+ssh <username>@<public-ip>
+```
+
+Verify that the web application is available:
+
+```text
+http://<public-ip>
+```
+
+If the application is displayed successfully, the image has been created correctly.
+
+---
+
+# Updating an Existing Image
+
+## Step 10: Modify the VM
+
+On the newly created VM:
+
+1. Install another web application.
+2. Configure any additional software or updates required.
+3. Verify that everything is working correctly.
+
+The VM now contains the updated configuration.
+
+---
+
+# Methods to Update an Image
+
+There are two ways to update an image:
+
+## Method 1: VM-Based Image Update
+
+1. Open the VM Overview page.
+2. Click **Capture**.
+3. Create a new image version from the updated VM.
+
+---
+
+## Method 2: Azure Compute Gallery Versioning
+
+This is the recommended method.
+
+### Create a New Image Version
+
+1. Search for **Azure Compute Gallery**.
+2. Open your Image Definition.
+3. Select the existing Image.
+4. Navigate to **Versions**.
+5. Click **Create Version**.
+6. Provide a new version number (e.g., 1.0.1, 1.0.2).
+7. Select the updated source VM.
+8. Configure replication settings.
+9. Click **Review + Create**.
+10. Click **Create**.
+
+Azure creates a new image version while preserving older versions.
+
+---
+
+# Summary
+
+1. Create a VM.
+2. Install and configure applications.
+3. Capture the VM as an Image.
+4. Store the image in Azure Compute Gallery.
+5. Create new VMs from the image.
+6. Make updates on a VM.
+7. Create a new image version.
+8. Deploy updated VMs using the latest image version.
+
+This approach provides a reusable, version-controlled VM image strategy for Azure environments.
+
+---
+
+# Azure Bastion Host
+
+## Overview
+
+Azure Bastion is a fully managed Platform-as-a-Service (PaaS) service that provides secure SSH and RDP connectivity to Azure Virtual Machines without exposing them to the public internet.
+
+Using Azure Bastion, administrators can securely connect to VMs directly from the Azure Portal or Azure CLI while the VMs remain in a private subnet.
+
+---
+
+## Prerequisites for Azure Bastion
+
+Before creating Azure Bastion, the following resources are required:
+
+### 1. Resource Group
+
+A logical container that holds Azure resources.
+
+### 2. Virtual Network (VNet)
+
+The network where Azure Bastion and Virtual Machines are deployed.
+
+### 3. AzureBastionSubnet
+
+A dedicated subnet required for Azure Bastion deployment.
+
+> **Note:** The subnet name must be `AzureBastionSubnet`.
+
+### 4. Public IP Address
+
+Azure Bastion requires a Public IP Address to provide secure connectivity.
+
+### 5. SKU (Stock Keeping Unit)
+
+| SKU       | Description                                            |
+| --------- | ------------------------------------------------------ |
+| Basic     | Suitable for small deployments                         |
+| Standard  | Recommended for enterprise and large-scale deployments |
+| Developer | Lightweight and cost-effective option (Latest Update)  |
+
+---
+
+## Architecture Flow
+
+```text
+                User
+          (Browser / CLI)
+                    |
+                    |
+              SSH / RDP
+                    |
+                    v
+           +----------------+
+           | Azure Bastion  |
+           |   (Public IP)  |
+           +----------------+
+                    |
+                    |
+                    v
+      +-----------------------------+
+      |      Virtual Network        |
+      |           (VNet)            |
+      |                             |
+      |     Private Subnet          |
+      |                             |
+      |  +------+ +------+ +------+ |
+      |  | VM-1 | | VM-2 | | VM-3 | |
+      |  +------+ +------+ +------+ |
+      +-----------------------------+
+```
+
+---
+
+## Steps to Implement Azure Bastion Host (Method-1)
+
+### Step 1: Create Azure Bastion Host
+
+1. Log in to the Azure Portal.
+2. Search for **Bastion** in the search bar.
+3. Select **Bastions**.
+4. Click **Create Bastion**.
+
+---
+
+### Step 2: Configure Basic Details
+
+1. Select or create a **Resource Group**.
+2. Enter the **Bastion Host Name**.
+3. Select the **Region**.
+4. Choose the **Availability Zone** (Optional).
+5. Select the **Tier/SKU** as **Basic**.
+6. Select an existing **Virtual Network (VNet)** or create a new one.
+7. If no Virtual Machine exists, Azure provides an option to create a VM during Bastion deployment.
+8. Create a **Public IP Address** and provide a name.
+9. Review all configurations.
+10. Click **Review + Create**.
+
+---
+
+### Step 3: Validation and Deployment
+
+1. Azure validates the configuration.
+2. If validation is successful, click **Create**.
+3. Deployment starts.
+
+---
+
+### Common Reason for Deployment Failure
+
+Azure Bastion deployment may fail due to the following reasons:
+
+- Virtual Network not selected.
+- Required subnet **AzureBastionSubnet** is missing.
+- AzureBastionSubnet size is smaller than the required CIDR range.
+- Public IP Address is not configured correctly.
+- Insufficient permissions in the subscription.
+- Region does not support the selected configuration.
+- Resource quota limitations.
+
+---
+
+### Mandatory Requirement
+
+Azure Bastion requires a dedicated subnet named:
+
+```text
+AzureBastionSubnet
+```
+
+Example:
+
+```text
+VNet: 10.0.0.0/16
+
+AzureBastionSubnet: 10.0.0.0/26
+Workload Subnet:    10.0.1.0/24
+```
+
+If the AzureBastionSubnet is missing, deployment will fail.
+
+---
+
+### Architecture Flow
+
+```text
+Browser / Azure CLI
+        |
+        | SSH / RDP
+        v
++------------------+
+| Azure Bastion    |
+|   Public IP      |
++------------------+
+        |
+        v
++----------------------+
+| Virtual Network      |
+|                      |
+| AzureBastionSubnet   |
+|                      |
+| Private Subnet       |
+|  +----+ +----+ +----+|
+|  |VM1 | |VM2 | |VM3 ||
+|  +----+ +----+ +----+|
++----------------------+
+```
+
+### Result
+
+After successful deployment:
+
+- Users connect through Azure Portal or Azure CLI.
+- Azure Bastion securely tunnels SSH/RDP sessions.
+- Virtual Machines remain private.
+- No Public IP is required on the VMs.
+- Ports 22 and 3389 do not need to be exposed to the internet.
+
+---
+
+# Azure Bastion Host (Method-2)
+
+## Steps to Implement Azure Bastion Host
+
+### Step 1: Create a Virtual Machine
+
+1. Log in to the Azure Portal.
+2. Search for **Virtual Machines**.
+3. Click **Create** → **Azure Virtual Machine**.
+
+---
+
+### Step 2: Configure Virtual Machine
+
+1. Create or select a **Resource Group**.
+2. Enter the **Virtual Machine Name**.
+3. Select the **Region**.
+4. Choose the **Availability Zone** (Optional).
+5. Select the **Image** as **Ubuntu Server**.
+6. Choose the **Authentication Type** as **Password**.
+7. Enter the **Username** and **Password**.
+8. Leave the remaining settings as default or configure as required.
+9. Click **Review + Create**.
+
+---
+
+### Step 3: Validation and Deployment
+
+1. Azure validates the VM configuration.
+2. Once validation is successful, click **Create**.
+3. Deployment starts.
+4. Wait until the Virtual Machine deployment is completed successfully.
+
+---
+
+### Step 4: Connect Using Azure Bastion
+
+1. Open the newly created Virtual Machine.
+2. Click on **Connect**.
+3. Select **Connect via Bastion**.
+
+Azure provides two options:
+
+* Create New Bastion
+* Configure Manually
+
+In this implementation, select **Create New Bastion**.
+
+---
+
+### Step 5: Create Azure Bastion
+
+Azure automatically populates most of the required settings.
+
+Configure the following:
+
+1. Bastion Host Name
+2. AzureBastionSubnet (created automatically if not available)
+3. Public IP Address
+4. SKU/Tier (Basic, Standard, or Developer)
+5. Virtual Network
+
+Click **Create**.
+
+---
+
+### Step 6: Validation and Deployment
+
+1. Azure validates the Bastion configuration.
+2. If validation passes, deployment starts.
+3. Wait until Azure Bastion deployment is completed successfully.
+
+---
+
+### Step 7: Connect to the Virtual Machine
+
+1. After Bastion deployment is complete, return to the VM.
+2. Click **Connect** → **Bastion**.
+3. Enter the VM credentials:
+
+   * Username
+   * Password
+4. Click **Connect**.
+
+Azure Bastion establishes a secure session directly from the browser.
+
+---
+
+## Architecture Flow
+
+```text
+Administrator
+(Browser)
+     |
+     | HTTPS (443)
+     v
++------------------+
+| Azure Bastion    |
+|  Public IP       |
++------------------+
+          |
+          |
+          v
++----------------------+
+| Virtual Network      |
+|                      |
+| AzureBastionSubnet   |
+|                      |
+| Ubuntu VM            |
+| (Private IP Only)    |
++----------------------+
+```
+
+---
+
+## Benefits of Azure Bastion
+
+* No Public IP required on the Virtual Machine.
+* SSH access through the Azure Portal.
+* Secure browser-based connectivity.
+* No need to expose port 22 to the internet.
+* Reduced attack surface.
+* Fully managed PaaS service.
+
+---
+
+## Result
+
+After successful deployment:
+
+* The Ubuntu VM remains inside a private network.
+* Azure Bastion securely provides SSH access.
+* No inbound SSH ports need to be opened.
+* Administrators can securely manage the VM directly from the Azure Portal.
+
+---
+
+## Interview Definition
+
+**Azure Bastion is a fully managed Platform-as-a-Service (PaaS) offering that enables secure SSH and RDP connectivity to Azure Virtual Machines through the Azure Portal without exposing the VMs to the public internet using Public IP addresses or open inbound ports.**
 
 ---
