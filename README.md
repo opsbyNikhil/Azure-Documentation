@@ -234,6 +234,68 @@
   - [Benefits of Azure Bastion](#benefits-of-azure-bastion)
   - [Result](#result-1)
   - [Interview Definition](#interview-definition)
+- [Azure Virtual Machine Scale Sets (VMSS) with Auto Scaling](#azure-virtual-machine-scale-sets-vmss-with-auto-scaling)
+  - [Overview](#overview-2)
+- [Steps to Create Azure Virtual Machine Scale Set (VMSS)](#steps-to-create-azure-virtual-machine-scale-set-vmss)
+  - [Step 1: Create VM Scale Set](#step-1-create-vm-scale-set)
+  - [Step 2: Configure Basics](#step-2-configure-basics)
+    - [Orchestration Modes](#orchestration-modes)
+      - [Flexible Mode](#flexible-mode)
+      - [Uniform Mode](#uniform-mode)
+  - [Step 3: Configure Security and Scaling](#step-3-configure-security-and-scaling)
+    - [Security Type](#security-type)
+    - [Scaling Mode](#scaling-mode)
+    - [Instance Count](#instance-count)
+    - [VM Configuration](#vm-configuration)
+  - [Step 4: Configure Management](#step-4-configure-management)
+    - [Upgrade Policy Options](#upgrade-policy-options)
+  - [Step 5: Configure Networking](#step-5-configure-networking)
+    - [Load Balancing](#load-balancing)
+    - [Architecture](#architecture)
+- [Load Balancer Types](#load-balancer-types)
+  - [1. Layer 4 Load Balancer (Azure Load Balancer)](#1-layer-4-load-balancer-azure-load-balancer)
+    - [Characteristics](#characteristics)
+    - [Architecture](#architecture-1)
+    - [Use Cases](#use-cases)
+  - [2. Layer 7 Load Balancer (Application Gateway)](#2-layer-7-load-balancer-application-gateway)
+    - [Characteristics](#characteristics-1)
+    - [Architecture](#architecture-2)
+    - [Features](#features-2)
+- [HTTP vs HTTPS](#http-vs-https)
+- [Certificates](#certificates)
+  - [SSL (Secure Sockets Layer)](#ssl-secure-sockets-layer)
+  - [TLS (Transport Layer Security)](#tls-transport-layer-security)
+  - [Network Configuration Selection](#network-configuration-selection)
+- [Configure Auto Scaling](#configure-auto-scaling)
+  - [Configure Scaling Rules](#configure-scaling-rules)
+    - [Example Scale-Out Rule](#example-scale-out-rule)
+    - [Example Scale-In Rule](#example-scale-in-rule)
+- [Instance Limits](#instance-limits)
+- [Additional Scaling Conditions](#additional-scaling-conditions)
+- [Scale-In Policy](#scale-in-policy)
+- [Important Note](#important-note-1)
+  - [Rules = Vertical Scaling](#rules--vertical-scaling)
+  - [Instance Limits = Horizontal Scaling](#instance-limits--horizontal-scaling)
+- [Benefits of VM Scale Sets](#benefits-of-vm-scale-sets)
+- [Summary](#summary-2)
+- [IPv4 Addressing and Subnet Mask Calculation](#ipv4-addressing-and-subnet-mask-calculation)
+  - [Example IP Address](#example-ip-address)
+- [Understanding Network ID and Host ID](#understanding-network-id-and-host-id)
+  - [Example](#example)
+    - [Binary Representation](#binary-representation)
+    - [Interpretation](#interpretation)
+- [IPv4 Structure](#ipv4-structure)
+- [Number of Hosts in a /24 Network](#number-of-hosts-in-a-24-network)
+- [Private IPv4 Address Ranges](#private-ipv4-address-ranges)
+  - [Class A](#class-a)
+  - [Class B](#class-b)
+  - [Class C](#class-c)
+- [Subnet Calculation for 2000 Hosts](#subnet-calculation-for-2000-hosts)
+  - [Find Network Bits](#find-network-bits)
+- [Binary Subnet Mask for /21](#binary-subnet-mask-for-21)
+- [How 11111000 Becomes 248](#how-11111000-becomes-248)
+- [Final Result](#final-result)
+- [SubnetMask](#subnetmask)
 
 ---
 
@@ -2473,5 +2535,682 @@ After successful deployment:
 ## Interview Definition
 
 **Azure Bastion is a fully managed Platform-as-a-Service (PaaS) offering that enables secure SSH and RDP connectivity to Azure Virtual Machines through the Azure Portal without exposing the VMs to the public internet using Public IP addresses or open inbound ports.**
+
+---
+
+# Azure Virtual Machine Scale Sets (VMSS) with Auto Scaling
+
+## Overview
+
+Azure Virtual Machine Scale Sets (VMSS) allow you to create and manage a group of identical virtual machines. VMSS helps automatically increase or decrease the number of virtual machines based on demand, ensuring high availability and cost optimization.
+
+---
+
+# Steps to Create Azure Virtual Machine Scale Set (VMSS)
+
+## Step 1: Create VM Scale Set
+
+1. Login to Azure Portal.
+2. Search for **Virtual Machine Scale Sets**.
+3. Click **Create**.
+
+---
+
+## Step 2: Configure Basics
+
+1. Create or select an existing **Resource Group**.
+2. Enter the **VM Scale Set Name**.
+3. Select:
+   - Region
+   - Availability Zone (AZ)
+   - Orchestration Mode
+
+### Orchestration Modes
+
+#### Flexible Mode
+
+- Supports up to **1000 VMs**.
+- Supports **different VM sizes**.
+- Provides greater flexibility for scaling and maintenance.
+
+#### Uniform Mode
+
+- Supports up to **100 VMs**.
+- All VMs must be of the **same size and configuration**.
+- Best for identical workloads.
+
+**Selected Mode:** Flexible
+
+---
+
+## Step 3: Configure Security and Scaling
+
+### Security Type
+
+- Trusted Launch
+
+### Scaling Mode
+
+- Manual
+
+### Instance Count
+
+- 2
+
+### VM Configuration
+
+Provide:
+
+- Operating System Image
+- VM Size
+- Authentication Type
+  - Username
+  - Password
+  - Confirm Password
+
+---
+
+## Step 4: Configure Management
+
+Navigate to **Management** tab.
+
+### Upgrade Policy Options
+
+| Policy | Description |
+|----------|-------------|
+| Automatic | Azure automatically updates instances |
+| Manual | Updates are performed manually |
+| Rolling | Updates are performed in batches |
+
+**Selected Policy:** Automatic
+
+---
+
+## Step 5: Configure Networking
+
+Navigate to **Networking** tab.
+
+### Load Balancing
+
+Suppose we have two virtual machines:
+
+- FS-VM-1 (Fashion Store)
+- Villa-VM-2
+
+When users access the application, traffic is distributed across the available VMs.
+
+### Architecture
+
+![Application Gateway Architecture](image(54).png)
+
+```text
+Chrome Browser
+       │
+      SSL
+       │
+       ▼
+Application Gateway
+     │       │
+    TLS     TLS
+     │       │
+     ▼       ▼
+ FS-VM-1  Villa-VM-2
+```
+
+---
+
+# Load Balancer Types
+
+## 1. Layer 4 Load Balancer (Azure Load Balancer)
+
+### Characteristics
+
+- Operates at the **Transport Layer (Layer 4)**.
+- Routes traffic based on:
+  - IP Address
+  - TCP Ports
+  - UDP Ports
+
+### Architecture
+
+```text
+Chrome
+   │
+   ▼
+Azure Load Balancer
+      │
+ ┌────┴────┐
+ ▼         ▼
+VM-1     VM-2
+```
+
+### Use Cases
+
+- Small applications
+- TCP/UDP traffic
+- Port forwarding
+
+---
+
+## 2. Layer 7 Load Balancer (Application Gateway)
+
+### Characteristics
+
+- Operates at the **Application Layer (Layer 7)**.
+- Supports:
+  - HTTP
+  - HTTPS
+  - URL-Based Routing
+  - Path-Based Routing
+
+### Architecture
+
+```text
+Chrome
+   │
+   ▼
+Application Gateway
+      │
+ ┌────┴────┐
+ ▼         ▼
+FS-VM-1   Villa-VM-2
+   │           │
+   ▼           ▼
+ Database   Database
+```
+
+### Features
+
+- URL-based routing
+- Path-based routing
+- SSL termination
+- Web Application Firewall (WAF) support
+
+---
+
+# HTTP vs HTTPS
+
+| Protocol | Description |
+|-----------|-------------|
+| HTTP | Not Secure |
+| HTTPS | Secure Communication |
+
+---
+
+# Certificates
+
+## SSL (Secure Sockets Layer)
+
+Used for securing communication between:
+
+```text
+Client Browser ↔ Internet ↔ Application Gateway
+```
+
+External communication typically uses SSL certificates.
+
+---
+
+## TLS (Transport Layer Security)
+
+Used for securing internal communication between services.
+
+```text
+Application Gateway ↔ Virtual Machines
+```
+
+TLS is the modern replacement for SSL.
+
+---
+
+## Network Configuration Selection
+
+For this setup:
+
+- Load Balancer: None (Normal Configuration)
+- Review and Create
+
+---
+
+# Configure Auto Scaling
+
+After deployment:
+
+1. Open the VM Scale Set.
+2. Navigate to:
+
+```text
+Availability + Scale
+```
+
+3. Select:
+
+```text
+Scaling
+```
+
+4. Choose:
+
+```text
+Scale based on metric
+```
+
+---
+
+## Configure Scaling Rules
+
+Click **Add Rule**.
+
+### Example Scale-Out Rule
+
+| Setting | Value |
+|-----------|--------|
+| Resource | VM Scale Set |
+| Metric | CPU Percentage |
+| Operator | Greater Than |
+| Threshold | 70% |
+| Action | Increase Instance Count |
+| Cool Down | 5 Minutes |
+
+---
+
+### Example Scale-In Rule
+
+| Setting | Value |
+|-----------|--------|
+| Resource | VM Scale Set |
+| Metric | CPU Percentage |
+| Operator | Less Than |
+| Threshold | 30% |
+| Action | Decrease Instance Count |
+| Cool Down | 5 Minutes |
+
+---
+
+# Instance Limits
+
+Configure the following:
+
+| Setting | Value |
+|----------|--------|
+| Minimum Instances | 2 |
+| Default Instances | 2 |
+| Maximum Instances | 10 |
+
+---
+
+# Additional Scaling Conditions
+
+You can also create scaling schedules based on:
+
+- Business Hours
+- Weekdays
+- Weekends
+- Special Events
+
+Example:
+
+```text
+Monday - Friday
+09:00 AM to 06:00 PM
+Scale to 5 Instances
+```
+
+---
+
+# Scale-In Policy
+
+Available options:
+
+| Policy | Description |
+|----------|-------------|
+| Default | Azure decides which VM to remove |
+| Newest VM | Removes newest VM first |
+| Oldest VM | Removes oldest VM first |
+
+**Selected Policy:** Default
+
+---
+
+# Important Note
+
+## Rules = Vertical Scaling
+
+Rules are based on resource metrics such as:
+
+- CPU
+- Memory
+- Disk
+- Network
+
+These metrics determine when scaling actions should occur.
+
+---
+
+## Instance Limits = Horizontal Scaling
+
+Horizontal scaling means:
+
+```text
+Adding or Removing VM Instances
+```
+
+Example:
+
+```text
+2 VMs → 5 VMs → 10 VMs
+```
+
+This helps handle increased application traffic automatically.
+
+---
+
+# Benefits of VM Scale Sets
+
+- High Availability
+- Automatic Scaling
+- Cost Optimization
+- Load Distribution
+- Simplified Management
+- Improved Application Performance
+
+---
+
+# Summary
+
+Azure VM Scale Sets (VMSS) provide automated scaling capabilities by increasing or decreasing VM instances based on metrics such as CPU utilization. Combined with Azure Load Balancer or Application Gateway, VMSS ensures high availability, fault tolerance, and efficient traffic distribution for modern cloud applications.
+
+---
+
+# IPv4 Addressing and Subnet Mask Calculation
+
+## Example IP Address
+
+```text
+IPv4 Address : 192.168.1.10
+Subnet Mask  : 255.255.255.0
+```
+
+---
+
+# Understanding Network ID and Host ID
+
+A subnet mask is used to identify:
+
+- **Network ID (Fixed Portion)**
+- **Host ID (Variable Portion)**
+
+## Example
+
+```text
+IP Address  : 192.168.1.10
+Subnet Mask : 255.255.255.0
+```
+
+### Binary Representation
+
+```text
+IP Address
+
+192      168      1        10
+11000000.10101000.00000001.00001010
+
+Subnet Mask
+
+255      255      255      0
+11111111.11111111.11111111.00000000
+```
+
+### Interpretation
+
+```text
+1 = Fixed (Network Portion)
+0 = Variable (Host Portion)
+
+11111111.11111111.11111111.00000000
+```
+
+Therefore:
+
+```text
+Network ID = 192.168.1
+Host ID    = 10
+```
+
+---
+
+# IPv4 Structure
+
+IPv4 consists of 32 bits divided into 4 octets.
+
+```text
+192.168.1.10
+
+192      168      1      10
+8 bits + 8 bits + 8 bits + 8 bits
+
+Total = 32 bits
+```
+
+---
+
+# Number of Hosts in a /24 Network
+
+Subnet Mask:
+
+```text
+255.255.255.0
+```
+
+Binary:
+
+```text
+11111111.11111111.11111111.00000000
+```
+
+Host bits:
+
+```text
+8 Host Bits
+```
+
+Formula:
+
+```text
+2^8 = 256 Addresses
+```
+
+Usable Host Addresses:
+
+```text
+256 - 2 = 254
+```
+
+Reserved Addresses:
+
+```text
+1. Network Address
+2. Broadcast Address
+```
+
+Therefore:
+
+```text
+Usable Hosts = 254
+```
+
+---
+
+# Private IPv4 Address Ranges
+
+## Class A
+
+```text
+10.0.0.0 - 10.255.255.255
+```
+
+## Class B
+
+```text
+172.16.0.0 - 172.31.255.255
+```
+
+## Class C
+
+```text
+192.168.0.0 - 192.168.255.255
+```
+
+---
+
+# Subnet Calculation for 2000 Hosts
+
+Requirement:
+
+```text
+Need = 2000 Hosts
+```
+
+Find the host bits:
+
+```text
+2^11 = 2048
+```
+
+Usable Hosts:
+
+```text
+2048 - 2 = 2046
+```
+
+Therefore:
+
+```text
+Host Bits = 11
+```
+
+---
+
+## Find Network Bits
+
+IPv4 contains:
+
+```text
+32 Total Bits
+```
+
+Formula:
+
+```text
+Network Bits = 32 - Host Bits
+```
+
+Calculation:
+
+```text
+32 - 11 = 21
+```
+
+Therefore:
+
+```text
+Network Bits = 21
+Host Bits    = 11
+```
+
+CIDR Notation:
+
+```text
+/21
+```
+
+---
+
+# Binary Subnet Mask for /21
+
+21 network bits:
+
+```text
+11111111.11111111.11111000.00000000
+```
+
+Convert to Decimal:
+
+```text
+11111111 = 255
+11111111 = 255
+11111000 = 248
+00000000 = 0
+```
+
+Subnet Mask:
+
+```text
+255.255.248.0
+```
+
+---
+
+# How 11111000 Becomes 248
+
+Binary:
+
+```text
+11111000
+```
+
+Bit Positions:
+
+```text
+2^7  2^6  2^5  2^4  2^3  2^2  2^1  2^0
+128   64   32   16    8    4    2    1
+```
+
+Binary Value:
+
+```text
+1     1    1    1    1    0    0    0
+```
+
+Calculation:
+
+```text
+128 + 64 + 32 + 16 + 8
+= 248
+```
+
+Or
+
+```text
+2^7 + 2^6 + 2^5 + 2^4 + 2^3
+= 128 + 64 + 32 + 16 + 8
+= 248
+```
+
+Therefore:
+
+```text
+11111000 = 248
+```
+
+---
+
+# Final Result
+
+```text
+IP Address   : 192.168.1.10
+Required Hosts : 2000
+
+Host Bits    : 11
+Network Bits : 21
+
+CIDR         : /21
+Subnet Mask  : 255.255.248.0
+```
+
+---
+
+# SubnetMask
+![subnetmask](./Images/subnet-mask-1.png)
 
 ---
